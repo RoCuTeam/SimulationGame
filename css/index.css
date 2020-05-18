@@ -1,0 +1,121 @@
+@font-face {
+  font-family: 'Gameplay';
+  name: 'Gameplay';
+  src: url('../fonts/game.ttf');
+}
+
+/* Z-Index guide:
+   -5: Banner
+   1:  UI components
+   5:  Canvas Game
+*/
+
+*{
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+
+  font-family: 'Gameplay';
+  color: white;
+  letter-spacing: 3px;
+}
+
+body{
+  height: 100vh;
+  width: 100vw;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+canvas{
+  border: 5px solid black;
+  z-index: 5;
+}
+
+.UI{
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  padding: 25px;
+
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1;
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-start;
+}
+
+.UI .score{
+  font-size: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.UI .health{
+  font-size: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.UI .health img{
+  margin: 5px;
+}
+
+.UI .inventory{
+  width: 15%;
+  text-align: center;
+  position: absolute;
+  right: 0;
+  top: 50px;
+}
+
+.UI .inventory h4{
+  font-size: 24px;
+  margin: 25px;
+}
+
+.UI .inventory ul{
+  list-style: none;
+}
+
+.UI .inventory ul li{
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+
+  background: rgba(255, 255, 255, 0.25);
+
+  padding: 10px;
+  margin: 25px 0;
+  border: 1px solid white;
+  border-radius: 25px 0 0 25px;
+
+  transition: all 0.3s;
+}
+
+.UI .inventory ul li:hover {
+  transform: scale(1.1);
+}
+
+.UI .inventory ul li img{
+  margin: 10px;
+  width: 50px;
+}
+
+.banner{
+  position: fixed;
+  z-index: -5;
+  width: 100vw;
+  height: 100vh;
+  background-size: cover;
+}
+
+.banner #redWall{
+  height: 75vh;
+  position: absolute;
+  top: 20%;
+}

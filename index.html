@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <title>Game</title>
+    <link rel="shortcut icon" href="assets/heart.png">
+    <link rel="stylesheet" href="css/index.css">
+    <script src="//cdn.jsdelivr.net/npm/phaser@3.11.0/dist/phaser.js"></script>
+    <script type="text/javascript" src="js/jquery.js"></script>
+    <script type="text/javascript" src="js/index.js"></script>
+</head>
+
+<body>
+  <div class="UI">
+    <div class="score">
+      <p>Score: 0</p>
+    </div>
+    <div class="health">
+      <p>Health: </p>
+      <img id="health1" src="assets/heart.png" width="30px" height="30px">
+      <img id="health2" src="assets/heart.png" width="30px" height="30px">
+      <img id="health3" src="assets/heart.png" width="30px" height="30px">
+    </div>
+    <div class="inventory">
+      <h4>Inventario</h4>
+      <ul>
+        <li id="polvore"><img src="assets/polvore.png"> X 0</li>
+        <li id="dinamite"><img src="assets/dinamite.png"> X 0</li>
+        <li id="shots"><img src="assets/fireball.png"> X 0</li>
+      </ul>
+    </div>
+  </div>
+  <div class="banner" style="background-image: url('assets/bg.jpg');">
+    <img id="redWall" src="assets/redWall.png">
+  </div>
+
+</body>
+</html>
