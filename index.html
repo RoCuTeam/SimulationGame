@@ -4,10 +4,10 @@
     <meta charset="UTF-8" />
     <title>Game</title>
     <link rel="shortcut icon" href="assets/heart.png">
+    <link rel="stylesheet" href="css/circle.css">
     <link rel="stylesheet" href="css/index.css">
     <script src="//cdn.jsdelivr.net/npm/phaser@3.11.0/dist/phaser.js"></script>
     <script type="text/javascript" src="js/jquery.js"></script>
-    <script type="text/javascript" src="js/index.js"></script>
 </head>
 
 <body>
@@ -15,11 +15,9 @@
     <div class="score">
       <p>Score: 0</p>
     </div>
+    <!--<button id="pause" type="button" name="button"> <img src="assets/pause.png" onclick="pause();"> </button>-->
     <div class="health">
       <p>Health: </p>
-      <img id="health1" src="assets/heart.png" width="30px" height="30px">
-      <img id="health2" src="assets/heart.png" width="30px" height="30px">
-      <img id="health3" src="assets/heart.png" width="30px" height="30px">
     </div>
     <div class="inventory">
       <h4>Inventario</h4>
@@ -28,11 +26,78 @@
         <li id="dinamite"><img src="assets/dinamite.png"> X 0</li>
         <li id="shots"><img src="assets/fireball.png"> X 0</li>
       </ul>
+      <h4>Cargas</h4>
+      <ul>
+        <li id="mana" style="display: flex; justify-content: flex-start;">
+          <h6>Magia</h6>
+          <div id="manaDisc" class="c100 p0 small dark">
+              <span style="color: white;">0%</span>
+              <div class="slice">
+                  <div class="bar"></div>
+                  <div class="fill"></div>
+              </div>
+          </div>
+          <span class="plus1" style="display: none;">+1 <img src="assets/fireball.png"></span>
+        </li>
+      </ul>
+    </div>
+    <div class="elements">
+      <ul>
+        <li id="boss">Boos: x 1</li>
+        <li id="ballons">Ballons restantes: x 0</li>
+      </ul>
     </div>
   </div>
   <div class="banner" style="background-image: url('assets/bg.jpg');">
     <img id="redWall" src="assets/redWall.png">
   </div>
-
+  <div class="pauseGame" style="display: none;">
+    <h2>Pausa</h2>
+    <p>Presiona INTRO para continuar</p>
+  </div>
+  <div class="startGame">
+    <section id="presentation">
+      <h2>Inicio</h2>
+      <p>Presiona INTRO para iniciar</p>
+      <div class="actions">
+        <button type="button" name="button" onclick="controls();">Controles</button>
+      </div>
+    </section>
+    <section id="controls" style="display: none;">
+      <div>
+        <h2>Controles</h2>
+        <p>Presiona INTRO para iniciar</p>
+      </div>
+      <div class="lists">
+        <div>
+          <h4>Mover personaje</h4>
+          <ul>
+            <li>W <span>Arriba</span></li>
+            <li>S <span>Abajo</span></li>
+            <li>A <span>Izquierda</span></li>
+            <li>D <span>Derecha</span></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Ataque</h4>
+          <ul>
+            <li>SPACE <span>Atacar</span></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Juego</h4>
+          <ul>
+            <li>P <span>Pausa</span></li>
+            <li>ENTER <span>Reanudar</span></li>
+          </ul>
+        </div>
+      </div>
+      <button type="button" name="button" onclick="presentation();">Inicio</button>
+    </section>
+  </div>
+  <script type="text/javascript" src="js/index.js"></script>
+  <script type="text/javascript">
+    randomBanner();
+  </script>
 </body>
 </html>
