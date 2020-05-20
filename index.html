@@ -12,6 +12,7 @@
 
 <body>
   <div class="UI">
+    <button type="button" name="button" onclick="location.reload();" style="position: absolute; bottom: 25px; right: 25px;">Reiniciar</button>
     <div class="score">
       <p>Score: 0</p>
     </div>
@@ -68,7 +69,7 @@
     <p>Presiona INTRO para continuar</p>
   </div>
   <div class="startGame">
-    <section id="presentation" style="display: none;">
+    <section id="presentation">
       <h1 style="font-size: 40px; margin: 25px; color: cyan;">Bombs & Dragons</h1>
       <h2>Inicio</h2>
       <p>Presiona ENTER para iniciar</p>
@@ -127,10 +128,10 @@
       <button type="button" name="button" onclick="presentation();">Inicio</button>
       <button type="button" name="button" onclick="controls();">Controles</button>
     </section>
-    <section id="endGame" style="">
+    <section id="endGame" style="display: none;">
       <h1 style="font-size: 40px; margin: 25px; color: cyan;">Bombs & Dragons</h1>
       <h2>JUEGO TERMINADO</h2>
-      <h3>GANASTE</h3>
+      <h3></h3>
       <button type="button" name="button" onclick="location.reload();">Reiniciar</button>
     </section>
   </div>

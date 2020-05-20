@@ -304,7 +304,7 @@ function create (){
     polvore = this.physics.add.group({
         key: 'polvore',
         repeat: 4,
-        setXY: { x: Phaser.Math.Between(0, 1920), y: Phaser.Math.Between(0, 1080) }
+        setXY: { x: Phaser.Math.Between(20, 1900), y: Phaser.Math.Between(20, 1060) }
     });
 
     // Enemigos
@@ -608,7 +608,7 @@ function dmgBoss(boss, fireball){
   fireball.disableBody(true, true);
   if(tintBoss <= 0){
     audioHurtDragon.play();
-    $('#boss #health' + health).remove();
+    $('#boss #health' + healthBoss).remove();
     healthBoss -= 1;
     score += 25;
     inventory['shots'] += 1;
@@ -644,7 +644,7 @@ function deleteFireball(platform, fireball){
 }
 
 function damageFortress(player, fortress){
-    if(inventory['dinamite'] > 0){
+    if(inventory['dinamite'] > 0 && detonateTNT <= 0){
       bomb = attacks.create(player.x, player.y, 'tntActive');
       bomb.anims.play('tntActive', true);
       bomb.setBounce(0);
@@ -653,6 +653,17 @@ function damageFortress(player, fortress){
       coldowns['fortress'] -= 1;
       detonateTNT = coldowns['detonation'];
     }
+}
+
+function addBallon(){
+  color = ballons[Phaser.Math.Between(0, 7)];
+  var enemy = enemies.create(Phaser.Math.Between(0, 1920), Phaser.Math.Between(0, 1080), 'ballon'+color);
+  enemy.setBounce(1);
+  enemy.setCollideWorldBounds(true);
+  enemy.setVelocity(Phaser.Math.Between(-200, 200), Phaser.Math.Between(-200, 200));
+  enemy.play(color+'IDLE');
+  enemy.allowGravity = false;
+  enemiesNum += 1;
 }
 
 // Funciones para UI y contadores
@@ -732,17 +743,6 @@ function updateCounters(){
   }
   // Recargar la UI
   refreshUI();
-}
-
-function addBallon(){
-  color = ballons[Phaser.Math.Between(0, 7)];
-  var enemy = enemies.create(Phaser.Math.Between(0, 1920), Phaser.Math.Between(0, 1080), 'ballon'+color);
-  enemy.setBounce(1);
-  enemy.setCollideWorldBounds(true);
-  enemy.setVelocity(Phaser.Math.Between(-200, 200), Phaser.Math.Between(-200, 200));
-  enemy.play(color+'IDLE');
-  enemy.allowGravity = false;
-  enemiesNum += 1;
 }
 
 function refreshUI(){
