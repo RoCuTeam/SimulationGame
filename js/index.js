@@ -30,7 +30,7 @@ var cursors;
 var bomb;
 
 // Boss
-var healthBoss = 25;
+var healthBoss = 20;
 var directionBossNum = 0;
 var directionBoss = ['down', 'left', 'top', 'right'];
 var stepsBoss = 0;
