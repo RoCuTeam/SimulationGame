@@ -111,24 +111,24 @@ canvas{
   width: 50px;
 }
 
-.UI .inventory ul li{
+.UI .inventory ul .load{
   display: flex;
   flex-flow: row-reverse;
   justify-content: space-between;
 }
 
-.UI .inventory ul li h6{
+.UI .inventory ul .load h6{
   width: 30%;
 }
 
-.UI .inventory ul li .plus1{
+.UI .inventory ul .load .plus1{
   width: 25%;
   display: flex;
   align-items: center;
   justify-content: flex-end;
 }
 
-.UI .inventory ul li .c100{
+.UI .inventory ul .load .c100{
   transform: scale(0.75);
 }
 
@@ -269,4 +269,17 @@ canvas{
   width: 100%;
   display: flex;
   justify-content: space-between;
+}
+
+.startGame #aboutIt {
+  margin: 25px;
+}
+
+.startGame #aboutIt h2{
+  margin: 25px;
+  text-align: center;
+}
+
+.startGame #aboutIt button{
+  margin: 25px;
 }

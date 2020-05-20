@@ -19,12 +19,22 @@ var config = {
 
 // Variables globales de juego
 var player;
+var boss;
 var stars;
 var enemies;
 var ballons = ['Blue', 'Cyan', 'Gold', 'Green', 'Pink', 'Red', 'White', 'Yellow'];
 var attacks;
 var platforms;
+var fortress;
 var cursors;
+var bomb;
+
+// Boss
+var healthBoss = 25;
+var directionBossNum = 0;
+var directionBoss = ['down', 'left', 'top', 'right'];
+var stepsBoss = 0;
+var isSleep = true;
 
 // Contadores y banderas
 var score = 0;
@@ -39,14 +49,18 @@ var coldowns = {
   'tintSecs': 50,
   'attackReload': 30,
   'manaReload': 2000,
-  'turnPause': 50,
+  'turnPause': 30,
   'nextEnemy': 500,
-  'buildTime': 2500
+  'buildTime': 750,
+  'detonation': 250,
+  'fortress': 3
 }
 // Contadores para recargas o eventos
 var tintSecs = 0;
+var tintBoss = 0;
 var attackSecs = 0;
 var turnPause = 0;
+var detonateTNT = 0;
 var building = coldowns['buildTime'];
 var nextEnemy = coldowns['nextEnemy'];
 var manaSecs = coldowns['manaReload'];
@@ -57,7 +71,6 @@ var lastDirection = 'Front';
 var loadAttacks = false;
 
 const baseVelocity = 160;
-
 var game = new Phaser.Game(config);
 
 function preload (){
@@ -75,13 +88,15 @@ function preload (){
     this.load.image('columnRocks', 'assets/rockColumn.png');
 
     //Fortaleza
-    this.load.image('column', 'assets/rockColumnx4.png');
-    this.load.image('line', 'assets/rockLinex4.png');
+    this.load.image('column', 'assets/fortressColumn.png');
+    this.load.image('line', 'assets/fortressLine.png');
     this.load.image('singleEnemy', 'assets/rock.png');
+    this.load.image('fortressFloor', 'assets/fortressFloor.png');
 
     // Objetos
     this.load.image('tnt', 'assets/dinamite.png');
     this.load.image('polvore', 'assets/polvore.png');
+    this.load.spritesheet('dinamiteActive', 'assets/dinamiteActive.png', { frameWidth: 40, frameHeight: 40 });
     this.load.spritesheet('fireball', 'assets/fireballSprite.png', { frameWidth: 25, frameHeight: 25 });
     this.load.spritesheet('explosion', 'assets/explosion.png', { frameWidth: 25, frameHeight: 25 });
     // Enemigos
@@ -93,6 +108,7 @@ function preload (){
     this.load.spritesheet('ballonRed', 'assets/enemyRed.png',  { frameWidth: 32, frameHeight: 48 });
     this.load.spritesheet('ballonWhite', 'assets/enemyWhite.png',  { frameWidth: 32, frameHeight: 48 });
     this.load.spritesheet('ballonYellow', 'assets/enemyYellow.png',  { frameWidth: 32, frameHeight: 48 });
+    this.load.spritesheet('boss', 'assets/boss.png',  { frameWidth: 60, frameHeight: 60 });
     // Jugador
     this.load.spritesheet('red', 'assets/red.png', { frameWidth: 32, frameHeight: 48 });
     // canvas
@@ -110,112 +126,105 @@ function create (){
     // Grupo de elementos estaticos, seran nuestras paredes y obstaculos
     platforms = this.physics.add.staticGroup();
     fortress = this.physics.add.staticGroup();
+    floor = this.physics.add.staticGroup();
 
     // Grupo de paredes y obstaculos en el mapa
-    //Fortaleza
-    fortress.create(960, 1050, 'singleEnemy');
-    fortress.create(835, 976, 'column');
-    fortress.create(1085, 976, 'column');
-    fortress.create(960, 890, 'line');
-
-    //Cuadrante uno del mapa
-    platforms.create(150, 100, 'lineRocks2');       //horizontal, vertical
-    platforms.create(700, 500, 'lineRocks');
-    platforms.create(150, 600, 'lineRocks3');
-
-    platforms.create(225, 300, 'columnRocks4');
-    platforms.create(500, 125, 'columnRocks');
-    platforms.create(800, 250, 'columnRocks3');
-    platforms.create(1050, 100, 'columnRocks2');
-    platforms.create(1000, 300, 'columnRocks2');
-    platforms.create(1050, 500, 'columnRocks2');
-
-    //Cuadrante dos del mapa
-    platforms.create(870, 30, 'lineRocks3');
-    platforms.create(1400, 100, 'lineRocks');
-    platforms.create(1700, 80, 'columnRocks3');
-    platforms.create(1440, 400, 'columnRocks');
-    platforms.create(1815, 350, 'lineRocks4');
-    platforms.create(1230, 380, 'lineRocks3');
-    platforms.create(1230, 220, 'singleRock');
-    platforms.create(1650, 600, 'lineRocks');
-
-    //Cuadrante tres del mapa
-    platforms.create(150, 850, 'columnRocks3');
-    platforms.create(950, 700, 'columnRocks3');
-    platforms.create(400, 600, 'columnRocks');
-    platforms.create(450, 970, 'lineRocks4');
-    platforms.create(700, 700, 'lineRocks3');
-    platforms.create(670, 870, 'columnRocks2');
-
-    //Cuadrante cuatro del mapa
-    platforms.create(1200, 700, 'lineRocks4');
-    platforms.create(1300, 1000, 'columnRocks3');
-    platforms.create(1840, 800, 'lineRocks3');
-    platforms.create(1500, 850, 'columnRocks');
-    platforms.create(1670, 920, 'lineRocks2');
-    platforms.create(1800, 1030, 'columnRocks2');
+    loadMap();
 
     // Crear el personaje
     player = this.physics.add.sprite(0, 0, 'red');
-
     // El juego será de vista aerea, por lo tanto no habra gravedad
     player.allowGravity = false;
     // Colisionar el personaje con los limites del mundo para que no salga de el
     player.setCollideWorldBounds(true);
+
+    // Crear el boss
+    boss = this.physics.add.sprite(960, 1000, 'boss').setTint(0x222222);
+    boss.allowGravity = false;
+    boss.setCollideWorldBounds(true);
     // Hacer que la camara siga a nuestro jugador
     this.cameras.main.startFollow(player);
 
     // Crear las animaciones del jugador
-    // Abajo
-    this.anims.create({
-        key: 'down',
-        frames: this.anims.generateFrameNumbers('red', { start: 0, end: 3 }),
-        frameRate: 10,
-        repeat: -1
-    });
-    // izquierda
-    this.anims.create({
-        key: 'left',
-        frames: this.anims.generateFrameNumbers('red', { start: 4, end: 7 }),
-        frameRate: 10,
-        repeat: -1
-    });
-    // Derecha
-    this.anims.create({
-        key: 'right',
-        frames: this.anims.generateFrameNumbers('red', { start: 8, end: 11 }),
-        frameRate: 10,
-        repeat: -1
-    });
-    // Arriba
-    this.anims.create({
-        key: 'top',
-        frames: this.anims.generateFrameNumbers('red', { start: 12, end: 15 }),
-        frameRate: 10,
-        repeat: -1
-    });
-    // Detenido
-    this.anims.create({
-        key: 'turnFront',
-        frames: [ { key: 'red', frame: 0 } ],
-        frameRate: 20
-    });
-    this.anims.create({
-        key: 'turnLeft',
-        frames: [ { key: 'red', frame: 4 } ],
-        frameRate: 20
-    });
-    this.anims.create({
-        key: 'turnRight',
-        frames: [ { key: 'red', frame: 8 } ],
-        frameRate: 20
-    });
-    this.anims.create({
-        key: 'turnBack',
-        frames: [ { key: 'red', frame: 12 } ],
-        frameRate: 20
-    });
+        // Abajo
+        this.anims.create({
+            key: 'down',
+            frames: this.anims.generateFrameNumbers('red', { start: 0, end: 3 }),
+            frameRate: 10,
+            repeat: -1
+        });
+        // izquierda
+        this.anims.create({
+            key: 'left',
+            frames: this.anims.generateFrameNumbers('red', { start: 4, end: 7 }),
+            frameRate: 10,
+            repeat: -1
+        });
+        // Derecha
+        this.anims.create({
+            key: 'right',
+            frames: this.anims.generateFrameNumbers('red', { start: 8, end: 11 }),
+            frameRate: 10,
+            repeat: -1
+        });
+        // Arriba
+        this.anims.create({
+            key: 'top',
+            frames: this.anims.generateFrameNumbers('red', { start: 12, end: 15 }),
+            frameRate: 10,
+            repeat: -1
+        });
+        // Detenido
+        this.anims.create({
+            key: 'turnFront',
+            frames: [ { key: 'red', frame: 0 } ],
+            frameRate: 20
+        });
+        this.anims.create({
+            key: 'turnLeft',
+            frames: [ { key: 'red', frame: 4 } ],
+            frameRate: 20
+        });
+        this.anims.create({
+            key: 'turnRight',
+            frames: [ { key: 'red', frame: 8 } ],
+            frameRate: 20
+        });
+        this.anims.create({
+            key: 'turnBack',
+            frames: [ { key: 'red', frame: 12 } ],
+            frameRate: 20
+        });
+
+    // Boss
+        // Abajo
+        this.anims.create({
+            key: 'downBoss',
+            frames: this.anims.generateFrameNumbers('boss', { start: 0, end: 2 }),
+            frameRate: 10,
+            repeat: -1
+        });
+        // izquierda
+        this.anims.create({
+            key: 'leftBoss',
+            frames: this.anims.generateFrameNumbers('boss', { start: 3, end: 5 }),
+            frameRate: 10,
+            repeat: -1
+        });
+        // Derecha
+        this.anims.create({
+            key: 'rightBoss',
+            frames: this.anims.generateFrameNumbers('boss', { start: 6, end: 8 }),
+            frameRate: 10,
+            repeat: -1
+        });
+        // Arriba
+        this.anims.create({
+            key: 'topBoss',
+            frames: this.anims.generateFrameNumbers('boss', { start: 9, end: 11 }),
+            frameRate: 10,
+            repeat: -1
+        });
 
     // Animaciones de los enemigos
     for (i in ballons){
@@ -238,11 +247,21 @@ function create (){
       key: 'explosion',
       frames: this.anims.generateFrameNumbers('explosion', { start: 0, end: 15 }),
       frameRate: 16
-    })
+    });
+    this.anims.create({
+      key: 'tntActive',
+      frames: this.anims.generateFrameNumbers('dinamiteActive', { start: 0, end: 3 }),
+      frameRate: 8,
+      repeat: -1
+    });
 
     // Marcador de vida
     for(var i = 1; i <= health; i++){
       $('.health').append('<img id="health'+i+'" src="assets/heart.png" width="30px" height="30px">');
+    }
+
+    for(var i = 1; i <= healthBoss; i++){
+      $('#boss').append('<img id="health'+i+'" src="assets/heart.png" width="20px" height="20px">');
     }
 
     // Controles: Se asignan los controles para mover a nuestro jugador (W-A-S-D)
@@ -270,22 +289,31 @@ function create (){
 
     // Colisiones en el juego
     this.physics.add.collider(player, platforms);
-    this.physics.add.collider(polvore, platforms);
+    this.physics.add.collider(player, fortress, damageFortress, null, this);
+    this.physics.add.collider(boss, fortress);
+    this.physics.add.collider(boss, platforms);
+    //this.physics.add.collider(polvore, platforms);
+    //this.physics.add.collider(polvore, fortress);
     this.physics.add.collider(enemies, platforms);
+    this.physics.add.collider(enemies, fortress);
     this.physics.add.collider(platforms, attacks, deleteFireball, null, this);
+    this.physics.add.collider(fortress, attacks, deleteFireball, null, this);
 
     // Eventos
     // Si el jugador toca la polvora
     this.physics.add.overlap(player, polvore, collectPolvore, null, this);
     // Si el jugador es tocado por un enemigo
     this.physics.add.collider(player, enemies, hitEnemy, null, this);
+    this.physics.add.collider(player, boss, hitBoss, null, this);
 
     // Si la polvora se sobrepone a una plataforma o a otra polvora
     this.physics.add.overlap(platforms, polvore, movePolvore, null, this);
     this.physics.add.overlap(polvore, polvore, movePolvore, null, this);
-
+    this.physics.add.overlap(fortress, polvore, movePolvore, null, this);
+    this.physics.add.overlap(floor, polvore, movePolvore, null, this);
     // Si la bola de fuego toca un enemigo
     this.physics.add.overlap(attacks, enemies, dmgEnemy, null, this);
+    this.physics.add.collider(attacks, boss, dmgBoss, null, this);
 }
 
 function update (){
@@ -391,12 +419,43 @@ function update (){
       paused = true;
       this.physics.pause();
     }
+
+    if(stepsBoss == 0 && isSleep == false){
+        boss.setTint();
+        stepsBoss = Phaser.Math.Between(20, 70);
+        if(directionBossNum == 3){
+          directionBossNum = 0;
+        }
+        else{
+          directionBossNum += 1;
+        }
+    }
+    else if(isSleep == false){
+        stepsBoss -= 1;
+        boss.anims.play(directionBoss[directionBossNum]+'Boss', true);
+        if(directionBoss[directionBossNum] == 'down'){
+          boss.setVelocityY(baseVelocity);
+          boss.setVelocityX(0);
+        }
+        else if(directionBoss[directionBossNum] == 'top'){
+          boss.setVelocityY(-baseVelocity);
+          boss.setVelocityX(0);
+        }
+        else if(directionBoss[directionBossNum] == 'left'){
+          boss.setVelocityX(-baseVelocity);
+          boss.setVelocityY(0);
+        }
+        else if(directionBoss[directionBossNum] == 'right'){
+          boss.setVelocityX(baseVelocity);
+          boss.setVelocityY(0);
+        }
+    }
     // Actualizar contadores y UI
     updateCounters();
   }
   else{
     if((cursors.start.isDown && turnPause == 0)){
-      // (cursors.pause.isDown && turnPause == 0) ||
+      //(cursors.pause.isDown && turnPause == 0) ||
       $('.pauseGame').fadeOut(100);
       $('.startGame').fadeOut(100);
       turnPause = coldowns['turnPause'];
@@ -436,7 +495,7 @@ function movePolvore(platform, stack){
 
 function hitEnemy (player, enemy){
     enemy.disableBody(true, true);
-    $('#health' + health).remove();
+    $('.health #health' + health).remove();
     health -= 1;
     enemiesNum -= 1;
 
@@ -452,12 +511,31 @@ function hitEnemy (player, enemy){
     }
 }
 
+function hitBoss (player, boss){
+    if(tintSecs <= 0){
+      $('.health #health' + health).remove();
+      health -= 1;
+
+      if(health <= 0){
+        this.physics.pause();
+        player.setTint(0xff0000);
+        player.anims.play('turn');
+        gameOver = true;
+      }
+      else{
+        tintSecs = coldowns['tintSecs'];
+        player.setTint(0xff0000);
+      }
+    }
+}
+
 function dmgEnemy(fireball, enemy){
   fireball.setVelocity(0, 0);
   fireball.play('explosion');
   fireball.on('animationcomplete', (fire)=>{
     fireball.disableBody(true, true);
   });
+
   enemy.disableBody(true, true);
 
   enemiesNum -= 1;
@@ -467,11 +545,52 @@ function dmgEnemy(fireball, enemy){
   inventory['shots'] += 1;
 }
 
+function dmgBoss(boss, fireball){
+  console.log("Dañando al Boss");
+  fireball.setVelocity(0, 0);
+  fireball.play('explosion');
+  fireball.disableBody(true, true);
+  if(tintBoss <= 0){
+    $('#boss #health' + health).remove();
+    healthBoss -= 1;
+    score += 25;
+    inventory['shots'] += 1;
+
+    if(healthBoss <= 0){
+      boss.disableBody(true, true);
+      score += 1000;
+
+      this.physics.pause();
+      player.setTint(0x00ff00);
+      player.anims.play('turn');
+      gameOver = true;
+    }
+    else{
+      tintBoss = coldowns['tintSecs'];
+      boss.setTint(0xff0000);
+    }
+
+    $('.score p').html("Score: " + score);
+  }
+}
+
 function deleteFireball(platform, fireball){
   fireball.play('explosion');
   fireball.on('animationcomplete', (fire)=>{
     fireball.disableBody(true, true);
   });
+}
+
+function damageFortress(player, fortress){
+    if(inventory['dinamite'] > 0){
+      bomb = attacks.create(player.x, player.y, 'tntActive');
+      bomb.anims.play('tntActive', true);
+      bomb.setBounce(0);
+      bomb.outOfBoundsKill = true;
+      inventory['dinamite'] -= 1;
+      coldowns['fortress'] -= 1;
+      detonateTNT = coldowns['detonation'];
+    }
 }
 
 // Funciones para UI y contadores
@@ -482,6 +601,14 @@ function updateCounters(){
     tintSecs -= 1;
     if(tintSecs <= 0){
       player.setTint();
+    }
+  }
+
+  // Si el Boss recivio daño
+  if(tintBoss != 0){
+    tintBoss -= 1;
+    if(tintBoss <= 0){
+      boss.setTint();
     }
   }
 
@@ -496,6 +623,41 @@ function updateCounters(){
     manaSecs = coldowns['manaReload'];
   }
 
+  // Si se puede armar polvora
+  if(inventory['polvore'] >= 5){
+    building -= 1;
+    if(building <= 0){
+      inventory['polvore'] -= 5;
+      inventory['dinamite'] += 1;
+      building = coldowns['buildTime'];
+    }
+  }
+
+  if(detonateTNT > 0){
+    detonateTNT -= 1;
+    if(detonateTNT == 0){
+      bomb.anims.play('explosion').setScale(5);
+      bomb.on('animationcomplete', (fire)=>{
+        bomb.disableBody(true, true);
+        if(coldowns['fortress'] == 2){
+          for(i in fortress.getChildren()){
+            fortress.getChildren()[i].setTint(0xFF7777);
+          }
+        }
+        if(coldowns['fortress'] == 1){
+          for(i in fortress.getChildren()){
+            fortress.getChildren()[i].setTint();
+          }
+        }
+        if(coldowns['fortress'] == 0){
+          isSleep = false;
+          fortress.clear(true, true);
+          coldowns['manaReload'] = parseInt(coldowns['manaReload'] / 2);
+          coldowns['nextEnemy'] = parseInt(coldowns['nextEnemy'] * 2);
+        }
+      });
+    }
+  }
   // Reducir contador de magia
   manaSecs -= 1;
   nextEnemy -= 1;
@@ -521,15 +683,28 @@ function addBallon(){
 
 function refreshUI(){
   manaPercent = 100 - parseInt((100 / coldowns['manaReload']) * manaSecs);
+  buildingPercent = 100 - parseInt((100 / coldowns['buildTime']) * building);
+
   $('#shots').html('<img src="assets/fireball.png"> X '+inventory['shots']);
   $('#mana .c100').removeClass();
   $('#mana #manaDisc').addClass('c100 small dark p'+manaPercent);
   $('#mana .c100 span').html(manaPercent+'%');
+
+  $('#dinamite').html('<img src="assets/dinamite.png"> X '+inventory['dinamite']);
+  $('#build .c100').removeClass();
+  $('#build #buildDisc').addClass('c100 small dark p'+buildingPercent);
+  $('#build .c100 span').html(buildingPercent+'%');
+
   $('.elements #ballons').html('Ballons restantes: x '+enemiesNum);
+
   if(inventory['shots'] > 0){
     $('#shots').css('background', 'rgba(255, 255, 255, 0.25)');
     $('#shots').css('border', '1px solid rgba(255, 255, 255, 1)');
   }
+
+  $('#polvore').html('<img src="assets/polvore.png"> X '+inventory['polvore']);
+  $('#dinamite').html('<img src="assets/dinamite.png"> X '+inventory['dinamite']);
+
   if(manaPercent == 100 || (manaPercent <= 15 && loadAttacks == true)){
     loadAttacks = true;
     $('#mana .plus1').fadeIn(150);
@@ -538,6 +713,12 @@ function refreshUI(){
     $('#mana .plus1').fadeOut(300);
   }
 
+  if(buildingPercent != 0){
+    $('#build .plus1').css("color", "white");
+  }
+  else{
+    $('#build .plus1').css("color", "red");
+  }
 }
 
 // Banner
@@ -553,10 +734,64 @@ function randomBanner(){
 // Screens
 function controls(){
   $('.startGame #presentation').fadeOut(50);
+  $('.startGame #aboutIt').fadeOut(50);
   $('.startGame #controls').fadeIn(500);
 }
 
 function presentation(){
   $('.startGame #controls').fadeOut(50);
+  $('.startGame #aboutIt').fadeOut(50);
   $('.startGame #presentation').fadeIn(500);
+}
+
+function aboutIt(){
+  $('.startGame #controls').fadeOut(50);
+  $('.startGame #presentation').fadeOut(50);
+  $('.startGame #aboutIt').fadeIn(500);
+}
+
+// Creacion del mapa
+function loadMap(){
+  //Fortaleza
+  fortress.create(835, 975, 'column').setTint(0x790000);
+  fortress.create(1085, 975, 'column').setTint(0x790000);
+  fortress.create(960, 900, 'line').setTint(0x790000);
+  floor.create(960,1000, 'fortressFloor');
+
+  //Cuadrante uno del mapa
+  platforms.create(150, 100, 'lineRocks2');       //horizontal, vertical
+  platforms.create(700, 500, 'lineRocks');
+  platforms.create(150, 600, 'lineRocks3');
+  platforms.create(225, 300, 'columnRocks4');
+  platforms.create(500, 125, 'columnRocks');
+  platforms.create(800, 250, 'columnRocks3');
+  platforms.create(1050, 100, 'columnRocks2');
+  platforms.create(1000, 300, 'columnRocks2');
+  platforms.create(1050, 500, 'columnRocks2');
+
+  //Cuadrante dos del mapa
+  platforms.create(870, 30, 'lineRocks3');
+  platforms.create(1400, 100, 'lineRocks');
+  platforms.create(1700, 80, 'columnRocks3');
+  platforms.create(1440, 400, 'columnRocks');
+  platforms.create(1815, 350, 'lineRocks4');
+  platforms.create(1230, 380, 'lineRocks3');
+  platforms.create(1230, 220, 'singleRock');
+  platforms.create(1650, 600, 'lineRocks');
+
+  //Cuadrante tres del mapa
+  platforms.create(150, 850, 'columnRocks3');
+  platforms.create(950, 700, 'columnRocks3');
+  platforms.create(400, 600, 'columnRocks');
+  platforms.create(450, 970, 'lineRocks4');
+  platforms.create(700, 700, 'lineRocks3');
+  platforms.create(670, 870, 'columnRocks2');
+
+  //Cuadrante cuatro del mapa
+  platforms.create(1200, 700, 'lineRocks4');
+  platforms.create(1300, 1000, 'columnRocks3');
+  platforms.create(1840, 800, 'lineRocks3');
+  platforms.create(1500, 850, 'columnRocks');
+  platforms.create(1670, 920, 'lineRocks2');
+  platforms.create(1800, 1030, 'columnRocks2');
 }
