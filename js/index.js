@@ -26,6 +26,19 @@ var attacks;
 var platforms;
 var cursors;
 
+// Variables de musica
+let audioMenu;
+let audioGame;
+let audioDisparo;
+let audioChoqueDisparo;
+let audioHurtPlayer;
+let audioHurtDragon;
+let audioLost;
+let audioWinning;
+let audioCharge;
+let audioCollect;
+var isMusicGame = false;
+
 // Contadores y banderas
 var score = 0;
 var health = 5;
@@ -41,7 +54,7 @@ var coldowns = {
   'manaReload': 2000,
   'turnPause': 50,
   'nextEnemy': 500,
-  'buildTime': 2500
+  'buildTime': 100
 }
 // Contadores para recargas o eventos
 var tintSecs = 0;
@@ -97,6 +110,18 @@ function preload (){
     this.load.spritesheet('red', 'assets/red.png', { frameWidth: 32, frameHeight: 48 });
     // canvas
     this.load.image('pauseBtn', 'assets/pause.png');
+    //Musica
+    //this.load.audio('backgroundMusic', ['music/GetOnTheBus.mp3', 'music/GetOnTheBus.ogg']);
+    this.load.audio('menuMusic', 'music/IceAndFirePeaceful.mp3');
+    this.load.audio('gameMusic', 'music/IceAndFireHeavy.mp3');
+    this.load.audio('disparo', 'music/Disparo.mp3');
+    this.load.audio('choqueDisparo', 'music/ChoqueDisparo.mp3');
+    this.load.audio('hurtPlayer', 'music/HurtPlayer.mp3');
+    this.load.audio('hurtDragon', 'music/HurtDragon.mp3');
+    this.load.audio('lost', 'music/Lost.mp3');
+    this.load.audio('winning', 'music/Winning.mp3');
+    this.load.audio('charge', 'music/Charge.mp3');
+    this.load.audio('collect', 'music/Collect.mp3');
 }
 
 function create (){
@@ -286,15 +311,41 @@ function create (){
 
     // Si la bola de fuego toca un enemigo
     this.physics.add.overlap(attacks, enemies, dmgEnemy, null, this);
+
+    //Música
+    //this.arrowSound = this.sound.add('backgroundMusic', {loop:true});
+    //this.arrowSound.play();
+    audioMenu = this.sound.add('menuMusic', {loop:true, volume:0.1});
+    audioGame = this.sound.add('gameMusic', {loop:true, volume:0.1});
+    audioDisparo = this.sound.add('disparo', {volume:0.7});
+    audioChoqueDisparo = this.sound.add('choqueDisparo', {volume:0.9});
+    audioHurtPlayer = this.sound.add('hurtPlayer', {volume:0.9});
+    audioHurtDragon = this.sound.add('hurtDragon', {volume:0.9});
+    audioLost = this.sound.add('lost', {volume:0.9});
+    audioWinning = this.sound.add('winning', {volume:0.9});
+    audioCharge = this.sound.add('charge', {volume:0.9});
+    audioCollect = this.sound.add('collect', {volume:0.9});
+
+    this.sound.pauseOnBlur = false;
+    audioMenu.play();
+
+    //audioHurtDragon.play();
+    //audioWinning.play();
+    //audioCharge.play();
 }
 
 function update (){
   if(paused == false){
+
+    if(isMusicGame == false){
+          audioMenu.stop();
+          audioGame.play();
+          isMusicGame = true;
+    }
     // Si se termino la vida
     if (gameOver){
         return;
     }
-
     // Movimiento del personaje
     if (cursors.up.isDown){
       lastDirection = 'Back';
@@ -316,7 +367,6 @@ function update (){
     else if(cursors.down.isDown){
       lastDirection = 'Front';
       player.setVelocityY(baseVelocity);
-
       if (cursors.left.isDown){
         player.setVelocityX(-baseVelocity);
         player.anims.play('left', true);
@@ -351,6 +401,7 @@ function update (){
     }
     // Ataque del personaje
     if(cursors.attack.isDown && attackSecs <= 0 && inventory['shots'] > 0){
+      audioDisparo.play();
       var fireball = attacks.create(player.x, player.y, 'fireball');
       fireball.setBounce(0);
       fireball.outOfBoundsKill = true;
@@ -415,6 +466,7 @@ function update (){
 function collectPolvore (player, stack){
     stack.disableBody(true, true);
     //  Add and update the score
+    audioCollect.play();
     score += 10;
     inventory['polvore'] += 1;
 
@@ -435,12 +487,14 @@ function movePolvore(platform, stack){
 }
 
 function hitEnemy (player, enemy){
+    audioHurtPlayer.play();
     enemy.disableBody(true, true);
     $('#health' + health).remove();
     health -= 1;
     enemiesNum -= 1;
 
     if(health <= 0){
+      audioLost.play();
       this.physics.pause();
       player.setTint(0xff0000);
       player.anims.play('turn');
@@ -454,6 +508,7 @@ function hitEnemy (player, enemy){
 
 function dmgEnemy(fireball, enemy){
   fireball.setVelocity(0, 0);
+  audioChoqueDisparo.play();
   fireball.play('explosion');
   fireball.on('animationcomplete', (fire)=>{
     fireball.disableBody(true, true);
@@ -468,6 +523,7 @@ function dmgEnemy(fireball, enemy){
 }
 
 function deleteFireball(platform, fireball){
+  audioChoqueDisparo.play();
   fireball.play('explosion');
   fireball.on('animationcomplete', (fire)=>{
     fireball.disableBody(true, true);
