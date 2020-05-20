@@ -548,6 +548,8 @@ function hitEnemy (player, enemy){
     enemiesNum -= 1;
 
     if(health <= 0){
+      $('.startGame#endGame h3').html('<span style="color: red;">PERDISTE</span>');
+      $('.startGame #endGame').fadeIn(300);
       audioLost.play();
       this.physics.pause();
       player.setTint(0xff0000);
@@ -567,6 +569,9 @@ function hitBoss (player, boss){
       health -= 1;
 
       if(health <= 0){
+        $('.startGame #endGame h3').html('<span style="color: red;">PERDISTE</span>');
+        $('.startGame #endGame').fadeIn(300);
+        audioLost.play();
         this.physics.pause();
         player.setTint(0xff0000);
         player.anims.play('turn');
@@ -617,6 +622,9 @@ function dmgBoss(boss, fireball){
       player.setTint(0x00ff00);
       player.anims.play('turn');
       gameOver = true;
+
+      $('.startGame #endGame h3').html('<span style="color: green;">FELICIDADES, GANASTE!!!</span>');
+      $('.startGame #endGame').fadeIn(300);
     }
     else{
       tintBoss = coldowns['tintSecs'];

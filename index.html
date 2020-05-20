@@ -68,10 +68,10 @@
     <p>Presiona INTRO para continuar</p>
   </div>
   <div class="startGame">
-    <section id="presentation">
+    <section id="presentation" style="display: none;">
       <h1 style="font-size: 40px; margin: 25px; color: cyan;">Bombs & Dragons</h1>
       <h2>Inicio</h2>
-      <p>Presiona INTRO para iniciar</p>
+      <p>Presiona ENTER para iniciar</p>
       <div class="actions">
         <button type="button" name="button" onclick="controls();">Controles</button>
         <button type="button" name="button" onclick="aboutIt();">Historia</button>
@@ -80,7 +80,7 @@
     <section id="controls" style="display: none;">
       <div>
         <h2>Controles</h2>
-        <p>Presiona INTRO para iniciar</p>
+        <p>Presiona ENTER para iniciar</p>
       </div>
       <div class="lists">
         <div>
@@ -96,6 +96,8 @@
           <h4>Ataque</h4>
           <ul>
             <li>SPACE <span>Atacar</span></li>
+            <br>
+            <li>Si tienes dinamita, toca la fortaleza para atacarla</li>
           </ul>
         </div>
         <div>
@@ -112,18 +114,27 @@
     <section id="aboutIt" style="display: none;">
       <div>
         <h2>Bienvenido a Bombs & Dragons</h2>
-        <p>Preparate para emprender la aventura de Kyle, un mago que ha aprendido las mas grandes
+        <p style="font-weight: normal;">Preparate para emprender la aventura de Kyle, un mago que ha aprendido las mas grandes
            artes magicas y alquimicas para librar al mundo de los monstruos.<br><br>
            Kyle debera vagar por el mundo reuniendo elementos para elaborar artefactos y
            acumulando magia para sus hechizos, esto para derrotar al Rey Dragon.<br><br>
            <br><br>
            Controla a Kyle y reune elementos para construir poderosos artefactos para despertar y derrotar al Rey Dragon, acaba con el y salva al mundo.
+           <br><br><br>
+           Diviertanse... Atentamente ROCU Studios
         </p>
       </div>
       <button type="button" name="button" onclick="presentation();">Inicio</button>
       <button type="button" name="button" onclick="controls();">Controles</button>
     </section>
+    <section id="endGame" style="">
+      <h1 style="font-size: 40px; margin: 25px; color: cyan;">Bombs & Dragons</h1>
+      <h2>JUEGO TERMINADO</h2>
+      <h3>GANASTE</h3>
+      <button type="button" name="button" onclick="location.reload();">Reiniciar</button>
+    </section>
   </div>
+
   <script type="text/javascript" src="js/index.js"></script>
   <script type="text/javascript">
     randomBanner();
