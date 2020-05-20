@@ -355,10 +355,6 @@ function create (){
 
     this.sound.pauseOnBlur = false;
     audioMenu.play();
-
-    //audioHurtDragon.play();
-    //audioWinning.play();
-    //audioCharge.play();
 }
 
 function update (){
@@ -566,6 +562,7 @@ function hitEnemy (player, enemy){
 
 function hitBoss (player, boss){
     if(tintSecs <= 0){
+      audioHurtPlayer.play();
       $('.health #health' + health).remove();
       health -= 1;
 
@@ -600,17 +597,19 @@ function dmgEnemy(fireball, enemy){
 }
 
 function dmgBoss(boss, fireball){
-  console.log("Dañando al Boss");
   fireball.setVelocity(0, 0);
+  audioChoqueDisparo.play();
   fireball.play('explosion');
   fireball.disableBody(true, true);
   if(tintBoss <= 0){
+    audioHurtDragon.play();
     $('#boss #health' + health).remove();
     healthBoss -= 1;
     score += 25;
     inventory['shots'] += 1;
 
     if(healthBoss <= 0){
+      audioWinning.play();
       boss.disableBody(true, true);
       score += 1000;
 
@@ -659,7 +658,7 @@ function updateCounters(){
     }
   }
 
-  // Si el Boss recivio daño
+  // Si el Boss recibio daño
   if(tintBoss != 0){
     tintBoss -= 1;
     if(tintBoss <= 0){
@@ -674,6 +673,7 @@ function updateCounters(){
 
   // Si el jugador carga magia
   if(manaSecs <= 0){
+    audioCharge.play();
     inventory['shots'] += 1;
     manaSecs = coldowns['manaReload'];
   }
@@ -682,6 +682,7 @@ function updateCounters(){
   if(inventory['polvore'] >= 5){
     building -= 1;
     if(building <= 0){
+      audioCharge.play();
       inventory['polvore'] -= 5;
       inventory['dinamite'] += 1;
       building = coldowns['buildTime'];
