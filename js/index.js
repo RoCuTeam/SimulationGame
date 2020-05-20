@@ -304,7 +304,7 @@ function create (){
     polvore = this.physics.add.group({
         key: 'polvore',
         repeat: 4,
-        setXY: { x: Phaser.Math.Between(20, 1900), y: Phaser.Math.Between(20, 1060) }
+        setXY: { x: Phaser.Math.Between(50, 1900), y: Phaser.Math.Between(50, 1060) }
     });
 
     // Enemigos
@@ -344,14 +344,14 @@ function create (){
     //this.arrowSound.play();
     audioMenu = this.sound.add('menuMusic', {loop:true, volume:0.1});
     audioGame = this.sound.add('gameMusic', {loop:true, volume:0.1});
-    audioDisparo = this.sound.add('disparo', {volume:0.7});
+    audioDisparo = this.sound.add('disparo', {volume:0.75});
     audioChoqueDisparo = this.sound.add('choqueDisparo', {volume:0.9});
     audioHurtPlayer = this.sound.add('hurtPlayer', {volume:0.9});
     audioHurtDragon = this.sound.add('hurtDragon', {volume:0.9});
     audioLost = this.sound.add('lost', {volume:0.9});
     audioWinning = this.sound.add('winning', {volume:0.9});
     audioCharge = this.sound.add('charge', {volume:0.9});
-    audioCollect = this.sound.add('collect', {volume:0.9});
+    audioCollect = this.sound.add('collect', {volume:0.25});
 
     this.sound.pauseOnBlur = false;
     audioMenu.play();
@@ -359,7 +359,9 @@ function create (){
 
 function update (){
   if(paused == false){
-
+    if(gameOver == false){
+      $('.startGame section').css("display", "none");
+    }
     if(isMusicGame == false){
           audioMenu.stop();
           audioGame.play();
@@ -549,6 +551,7 @@ function hitEnemy (player, enemy){
 
     if(health <= 0){
       $('.startGame#endGame h3').html('<span style="color: red;">PERDISTE</span>');
+      $('.startGame').fadeIn(300);
       $('.startGame #endGame').fadeIn(300);
       audioLost.play();
       this.physics.pause();
@@ -570,6 +573,7 @@ function hitBoss (player, boss){
 
       if(health <= 0){
         $('.startGame #endGame h3').html('<span style="color: red;">PERDISTE</span>');
+        $('.startGame').fadeIn(300);
         $('.startGame #endGame').fadeIn(300);
         audioLost.play();
         this.physics.pause();
@@ -624,6 +628,7 @@ function dmgBoss(boss, fireball){
       gameOver = true;
 
       $('.startGame #endGame h3').html('<span style="color: green;">FELICIDADES, GANASTE!!!</span>');
+      $('.startGame').fadeIn(300);
       $('.startGame #endGame').fadeIn(300);
     }
     else{
@@ -657,13 +662,25 @@ function damageFortress(player, fortress){
 
 function addBallon(){
   color = ballons[Phaser.Math.Between(0, 7)];
-  var enemy = enemies.create(Phaser.Math.Between(0, 1920), Phaser.Math.Between(0, 1080), 'ballon'+color);
-  enemy.setBounce(1);
-  enemy.setCollideWorldBounds(true);
-  enemy.setVelocity(Phaser.Math.Between(-200, 200), Phaser.Math.Between(-200, 200));
-  enemy.play(color+'IDLE');
-  enemy.allowGravity = false;
-  enemiesNum += 1;
+  var enemyx = Phaser.Math.Between(0, 1920);
+  var enemyy = Phaser.Math.Between(0, 1080);
+  var distanceToPLayer = Math.sqrt( (Math.abs(enemyx - player.x)**2) + (Math.abs(enemyx - player.x)**2) );
+  console.log(distanceToPLayer);
+  while(distanceToPLayer < 250){
+    var enemyx = Phaser.Math.Between(0, 1920);
+    var enemyy = Phaser.Math.Between(0, 1080);
+    var distanceToPLayer = Math.sqrt( (Math.abs(enemyx - player.x)**2) + (Math.abs(enemyx - player.x)**2) );
+    console.log(distanceToPLayer);
+  }
+  if(distanceToPLayer >= 250){
+    var enemy = enemies.create(enemyx, enemyy, 'ballon'+color);
+    enemy.setBounce(1);
+    enemy.setCollideWorldBounds(true);
+    enemy.setVelocity(Phaser.Math.Between(-200, 200), Phaser.Math.Between(-200, 200));
+    enemy.play(color+'IDLE');
+    enemy.allowGravity = false;
+    enemiesNum += 1;
+  }
 }
 
 // Funciones para UI y contadores
@@ -791,7 +808,7 @@ function randomBanner(){
     var x = Math.floor(Math.random() * ($(document).width() - 0) + 0);
     var y = Math.floor(Math.random() * ($(document).height() - 0) + 0);
     var rotation = Math.floor(Math.random() * (90 - 0) + 0);
-    $('.banner').append('<img class="spirit" src="assets/darkSpirit.png" style="top: '+x+'px; left: '+y+'px; transform: rotate('+rotation+'deg)">');
+    $('.banner').append('<img class="spirit" src="assets/darkspirit.png" style="top: '+x+'px; left: '+y+'px; transform: rotate('+rotation+'deg)">');
   }
 }
 
