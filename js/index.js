@@ -49,15 +49,17 @@ let audioCharge;
 let audioCollect;
 var isMusicGame = false;
 
-// Contadores y banderas
-var score = 0;
+// Jugador
 var health = 5;
+var score = 0;
 var enemiesNum = 0;
 var inventory = {
   "polvore": 0,
   "dinamite": 0,
   "shots": 5
 }
+
+// Coldown, variables para modificar mecanicas del juego
 var coldowns = {
   'tintSecs': 50,
   'attackReload': 30,
@@ -68,6 +70,7 @@ var coldowns = {
   'detonation': 250,
   'fortress': 3
 }
+
 // Contadores para recargas o eventos
 var tintSecs = 0;
 var tintBoss = 0;
@@ -162,13 +165,13 @@ function create (){
     player.allowGravity = false;
     // Colisionar el personaje con los limites del mundo para que no salga de el
     player.setCollideWorldBounds(true);
+    // Hacer que la camara siga a nuestro jugador
+    this.cameras.main.startFollow(player);
 
     // Crear el boss
     boss = this.physics.add.sprite(960, 1000, 'boss').setTint(0x222222);
     boss.allowGravity = false;
     boss.setCollideWorldBounds(true);
-    // Hacer que la camara siga a nuestro jugador
-    this.cameras.main.startFollow(player);
 
     // Crear las animaciones del jugador
         // Abajo
@@ -317,8 +320,7 @@ function create (){
     this.physics.add.collider(player, fortress, damageFortress, null, this);
     this.physics.add.collider(boss, fortress);
     this.physics.add.collider(boss, platforms);
-    //this.physics.add.collider(polvore, platforms);
-    //this.physics.add.collider(polvore, fortress);
+
     this.physics.add.collider(enemies, platforms);
     this.physics.add.collider(enemies, fortress);
     this.physics.add.collider(platforms, attacks, deleteFireball, null, this);
@@ -371,6 +373,7 @@ function update (){
     if (gameOver){
         return;
     }
+
     // Movimiento del personaje
     if (cursors.up.isDown){
       lastDirection = 'Back';
@@ -539,7 +542,7 @@ function collectPolvore (player, stack){
 
 function movePolvore(platform, stack){
   stack.disableBody(true, true);
-  stack.enableBody(true, Phaser.Math.Between(0, 1920), Phaser.Math.Between(0, 1080), true, true);
+  stack.enableBody(true, Phaser.Math.Between(50, 1900), Phaser.Math.Between(50, 1060), true, true);
 }
 
 function hitEnemy (player, enemy){
@@ -684,8 +687,8 @@ function addBallon(){
 }
 
 // Funciones para UI y contadores
-function updateCounters(){
 
+function updateCounters(){
   // Si el jugador habia recibido daño
   if(tintSecs != 0){
     tintSecs -= 1;
